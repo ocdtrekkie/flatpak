@@ -3030,6 +3030,12 @@ flatpak_installation_list_unused_refs (FlatpakInstallation *self,
       if (arch != NULL && strcmp (parts[2], arch) != 0)
         continue;
 
+      if (flatpak_dir_ref_is_pinned (dir, ref))
+        {
+          g_debug ("Ref %s is pinned, considering as used", ref);
+          continue;
+        }
+
       if (!g_hash_table_contains (used_refs, ref))
         {
           if (g_hash_table_add (refs_hash, (gpointer) ref))
