@@ -220,10 +220,24 @@ flatpak_builtin_uninstall (int argc, char **argv, GCancellable *cancellable, GEr
           g_autoptr(FlatpakInstallation) installation = NULL;
           UninstallDir *udir;
           g_autoptr(GPtrArray) unused = NULL;
+          g_autoptr(GPtrArray) pinned_patterns = NULL;
 
           flatpak_dir_maybe_ensure_repo (dir, NULL, NULL);
           if (flatpak_dir_get_repo (dir) == NULL)
             continue;
+
+          pinned_patterns = flatpak_dir_get_config_patterns (dir, "pinned");
+          if (pinned_patterns->len > 0)
+            {
+              g_print (_("These runtimes in installation %s are pinned and won't be removed; see flatpak-pin(1):\n"),
+                       flatpak_dir_get_name_cached (dir));
+              for (i = 0; i < pinned_patterns->len; i++)
+                {
+                  const char *pattern = g_ptr_array_index (pinned_patterns, i);
+                  g_print ("  %s\n", pattern);
+                }
+              g_print ("\n");
+            }
 
           udir = uninstall_dir_ensure (uninstall_dirs, dir);
 
